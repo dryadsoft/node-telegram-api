@@ -9,6 +9,11 @@
   "author": "dryadsoft <dryadsoft@gmail.com>",
   "description": "node telegram api",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dryadsoft/node-telegram-api.git"
+  },
+  "homepage": "https://github.com/dryadsoft/node-telegram-api",
   "scripts": {
     "prepublishOnly": "tsc"
   },
