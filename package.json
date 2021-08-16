@@ -1,0 +1,24 @@
+{
+  "name": "node-telegram-api",
+  "version": "0.0.2",
+  "main": "lib/index.js",
+  "files": [
+    "lib/**/*"
+  ],
+  "types": "lib/index.d.ts",
+  "author": "dryadsoft <dryadsoft@gmail.com>",
+  "description": "node telegram api",
+  "license": "MIT",
+  "scripts": {
+    "prepublishOnly": "tsc"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "moment": "^2.29.1",
+    "moment-timezone": "^0.5.33"
+  },
+  "devDependencies": {
+    "@types/node": "^16.6.1",
+    "typescript": "^4.3.5"
+  }
+}
