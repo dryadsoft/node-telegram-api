@@ -9,14 +9,12 @@ export default class TelegramApi {
   private getUpdatesUrl: string;
   private sendMessageUrl: string;
   private deleteMessageUrl: string;
-  private chatId: string;
   private lastUpdateMessageId?: number;
 
-  constructor(teletramToken: string, chatId: string) {
+  constructor(teletramToken: string) {
     this.getUpdatesUrl = `${BASE_URL}/bot${teletramToken}/getUpdates`;
     this.sendMessageUrl = `${BASE_URL}/bot${teletramToken}/sendMessage`;
     this.deleteMessageUrl = `${BASE_URL}/bot${teletramToken}/deleteMessage`;
-    this.chatId = chatId;
 
     (async () => {
       this.setLastMessageId(await this.getLastUpdateMessageId());
@@ -53,11 +51,11 @@ export default class TelegramApi {
    * 메시지 보내기
    * @param message: string
    */
-  async sendMessage(message: string) {
+  async sendMessage(chatId: string, message: string) {
     await Fetch.post(
       this.sendMessageUrl,
       {
-        chat_id: this.chatId,
+        chat_id: chatId,
         text: message,
         parse_mode: "markdown",
       },
@@ -70,11 +68,15 @@ export default class TelegramApi {
    * @param message: string
    * @param inlineButton: string
    */
-  async sendinlineButtonMessage(message: string, inlineButton: string) {
+  async sendinlineButtonMessage(
+    chatId: string,
+    message: string,
+    inlineButton: string
+  ) {
     await Fetch.post(
       this.sendMessageUrl,
       {
-        chat_id: this.chatId,
+        chat_id: chatId,
         text: message,
         parse_mode: "MarkDown",
         reply_markup: inlineButton,
@@ -87,11 +89,11 @@ export default class TelegramApi {
    * 메시지 삭제하기
    * @param messageId: number
    */
-  async deleteMessage(messageId: number) {
+  async deleteMessage(chatId: string, messageId: number) {
     await Fetch.post(
       this.deleteMessageUrl,
       {
-        chat_id: this.chatId,
+        chat_id: chatId,
         message_id: messageId,
       },
       5000
