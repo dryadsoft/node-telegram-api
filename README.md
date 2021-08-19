@@ -17,7 +17,9 @@ yarn 사용:
 $ yarn add node-telegram-api
 ```
 
-## 예제
+## 예제(usage)
+
+### TypeScript
 
 ```typescript
 import TelegramApi from "node-telegram-api";
@@ -42,6 +44,8 @@ const keyboard = [
 telegramApi.sendKeyboardMessage(TELEGRAM_CHAT_ID, "키보드", keyboard);
 ```
 
+![키보드메시지](https://github.com/dryadsoft/node-telegram-api/blob/master/images/keyboardmessage.JPG)
+
 ```typescript
 // 3.인라인 버튼 예제
 const inlineButton = [
@@ -62,6 +66,8 @@ telegramApi.sendInlineButtonMessage(
   inlineButton
 );
 ```
+
+![키보드메시지](https://github.com/dryadsoft/node-telegram-api/blob/master/images/inlinebutton.JPG)
 
 ```typescript
 // 4. telegram bot 예제
@@ -130,3 +136,11 @@ telegramApi.sendInlineButtonMessage(
   }
 })();
 ```
+
+## Resources
+
+- [CHANGELOG](https://github.com/dryadsoft/node-telegram-api/blob/master/CHANGELOG.md)
+
+## License
+
+[MIT](LICENSE)
