@@ -25,10 +25,7 @@ class Fetch {
       setTimeout(() => {
         source.cancel(`request timeout: ${timeout}, ${url}`);
       }, timeout);
-      const res = await axios.post(url, {
-        cancelToken: source.token,
-        ...params,
-      });
+      const res = await axios.post(url, params, { cancelToken: source.token });
       return res;
     } catch (err) {
       if (axios.isCancel(err)) {

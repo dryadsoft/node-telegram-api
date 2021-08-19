@@ -1,6 +1,6 @@
 import moment from "moment";
 import "moment-timezone";
-import { IResultProps } from "./@types";
+import { IInlineButton, IResultProps } from "./@types";
 import Fetch from "./Fetch";
 
 const BASE_URL = `https://api.telegram.org`;
@@ -51,13 +51,36 @@ export default class TelegramApi {
    * 메시지 보내기
    * @param message: string
    */
-  async sendMessage(chatId: string, message: string) {
+  async sendMessage(chatId: number, message: string, parse_mode?: string) {
     await Fetch.post(
       this.sendMessageUrl,
       {
         chat_id: chatId,
         text: message,
-        parse_mode: "markdown",
+        parse_mode,
+      },
+      5000
+    );
+  }
+
+  /**
+   * inline button 메시지 보내기
+   * @param message: string
+   * @param inlineButton: IInlineButton[][]
+   */
+  async sendInlineButtonMessage(
+    chatId: number,
+    message: string,
+    inlineButton: IInlineButton[][],
+    parse_mode?: string
+  ) {
+    await Fetch.post(
+      this.sendMessageUrl,
+      {
+        chat_id: chatId,
+        text: message,
+        parse_mode,
+        reply_markup: JSON.stringify({ inline_keyboard: inlineButton }),
       },
       5000
     );
@@ -68,10 +91,10 @@ export default class TelegramApi {
    * @param message: string
    * @param inlineButton: string
    */
-  async sendinlineButtonMessage(
-    chatId: string,
+  async sendKeyboardMessage(
+    chatId: number,
     message: string,
-    inlineButton: string
+    keyboard: string[][]
   ) {
     await Fetch.post(
       this.sendMessageUrl,
@@ -79,7 +102,10 @@ export default class TelegramApi {
         chat_id: chatId,
         text: message,
         parse_mode: "MarkDown",
-        reply_markup: inlineButton,
+        reply_markup: JSON.stringify({
+          keyboard: keyboard,
+          resize_keyboard: true,
+        }),
       },
       5000
     );
@@ -89,7 +115,7 @@ export default class TelegramApi {
    * 메시지 삭제하기
    * @param messageId: number
    */
-  async deleteMessage(chatId: string, messageId: number) {
+  async deleteMessage(chatId: number, messageId: number) {
     await Fetch.post(
       this.deleteMessageUrl,
       {

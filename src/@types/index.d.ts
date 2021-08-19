@@ -25,8 +25,8 @@ export interface IMessage {
 
 export interface ICallbackProps {
   id: string;
-  from: any;
-  message: any;
+  from: IFromProps;
+  message: IMessage;
   chat_instance: string;
   data: string;
 }
@@ -35,4 +35,9 @@ export interface IResultProps {
   update_id: number;
   message?: IMessage;
   callback_query?: ICallbackProps;
+}
+
+export interface IInlineButton {
+  text: string;
+  callback_data: string;
 }
