@@ -1,5 +1,4 @@
 import moment from "moment";
-import "moment-timezone";
 import { IInlineButton, IResultProps } from "./@types";
 import Fetch from "./Fetch";
 
@@ -179,7 +178,7 @@ export default class TelegramApi {
 
   asyncLog(msg: any) {
     return new Promise((resolve) => {
-      console.log(moment().tz("Asia/Seoul").format("YYYY-MM-DD HH:mm:ss"), msg);
+      console.log(moment().format("YYYY-MM-DD HH:mm:ss"), msg);
       return resolve("");
     });
   }

@@ -1,7 +1,7 @@
 import TelegramApi from ".";
 
 const TELEGRAM_TOKEN = "your telegram token";
-const TELEGRAM_CHAT_ID = 123445554; // your telegram chat ID
+const TELEGRAM_CHAT_ID = 12345678; // your telegram chat ID
 
 const telegramApi = new TelegramApi(TELEGRAM_TOKEN);
 
