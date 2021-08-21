@@ -1,23 +1,175 @@
 import moment from "moment";
-import { IInlineButton, IResultProps } from "./@types";
+import {
+  callbackType,
+  ICallbackProps,
+  IInlineButton,
+  IMessage,
+  IPollingArgumentProps,
+  IResultProps,
+  ITelegramApiProps,
+  listenerType,
+} from "./@types";
 import Fetch from "./Fetch";
 
 const BASE_URL = `https://api.telegram.org`;
 
 export default class TelegramApi {
+  private SERIES: string = "series"; // 직렬
+  private PARALLEL: string = "parallel"; // 병렬
   private getUpdatesUrl: string;
   private sendMessageUrl: string;
   private deleteMessageUrl: string;
   private lastUpdateMessageId?: number;
+  private pollingArguments: IPollingArgumentProps[] = [];
 
-  constructor(teletramToken: string) {
+  /**
+   * constructor
+   * @param teletramToken: string;
+   * @paran options?: ITelegramApiProps
+   * @return void
+   */
+  constructor(teletramToken: string, options?: ITelegramApiProps) {
     this.getUpdatesUrl = `${BASE_URL}/bot${teletramToken}/getUpdates`;
     this.sendMessageUrl = `${BASE_URL}/bot${teletramToken}/sendMessage`;
     this.deleteMessageUrl = `${BASE_URL}/bot${teletramToken}/deleteMessage`;
 
     (async () => {
       this.setLastMessageId(await this.getLastUpdateMessageId());
+      if (options?.polling) {
+        await this.startPolling(options);
+      }
     })();
+  }
+
+  /**
+   * startPolling
+   * @param options: ITelegramApiProps
+   */
+  private async startPolling(options: ITelegramApiProps) {
+    while (options.polling) {
+      const arrResult = await this.getUpdates();
+      if (arrResult) {
+        if (options.process === this.SERIES) {
+          // 메시지 직렬방식으로 처리
+          await this.pollSeriesJob(arrResult);
+        } else {
+          // 메시지 병렬방식으로 처리(default)
+          await this.pollParallelJob(arrResult);
+        }
+      }
+      // sleep 1초
+      await this.sleep(1000);
+    }
+  }
+
+  /**
+   * pollParallel
+   * 메시지 병렬처리
+   * @param arrResult: IResultProps[]
+   */
+  private async pollParallelJob(arrResult: IResultProps[]) {
+    arrResult.forEach(async (item) => {
+      if (item.message) {
+        // 일반 메시지
+        await this.callTextMessage(item.message);
+      } else if (item.callback_query) {
+        // 채팅창의 버튼클릭시 콜백처리
+        await this.callCallbackMessage(item.callback_query);
+      }
+    });
+  }
+
+  /**
+   * series
+   * 메시지 직렬처리
+   * @param arrResult: IResultProps[]
+   */
+  private async pollSeriesJob(arrResult: IResultProps[]) {
+    for (const item of arrResult) {
+      if (item.message) {
+        // 일반 메시지 콜백처리
+        await this.callTextMessage(item.message);
+      } else if (item.callback_query) {
+        // 채팅창의 버튼클릭시 콜백처리
+        await this.callCallbackMessage(item.callback_query);
+      }
+    }
+  }
+
+  /**
+   * callTextMessage
+   * 채팅창에 일반메시지 입력되었을때 콜백처리
+   * @param message: IMessage
+   */
+  private async callTextMessage(message: IMessage) {
+    const {
+      message_id,
+      chat: { id },
+      from: { is_bot },
+      text,
+    } = message;
+    if (!is_bot) {
+      const callback = this.getPollingCallback("text");
+      if (typeof callback === "function") {
+        await callback({ chatId: id, messageId: message_id, text });
+      }
+    }
+  }
+
+  /**
+   * callCallbackMessage
+   * 채팅창에 생성된 버튼을 클릭하였을때 콜백처리
+   * @param callback_query: ICallbackProps
+   */
+  private async callCallbackMessage(callback_query: ICallbackProps) {
+    // 채팅창의 버튼클릭시 콜백처리
+    const {
+      message: {
+        message_id,
+        chat: { id },
+        text,
+      },
+      data,
+    } = callback_query;
+    const callback = this.getPollingCallback("callback");
+    if (typeof callback === "function") {
+      await callback({
+        chatId: id,
+        messageId: message_id,
+        text,
+        data,
+      });
+    }
+  }
+  /**
+   * getPollingCallback
+   * listener에 등로된 콜백함수를 리턴
+   * @param listener: "text" | "callback"
+   * @return (param: IPollingCallbackProps) => Promise<void>
+   */
+  private getPollingCallback(listener: listenerType) {
+    return this.pollingArguments.filter(
+      (value) => value.listener === listener
+    )[0].callback;
+  }
+  /**
+   * isPollingListener
+   * 이미 listener에 등록되어있는지 체크한다.
+   * @param listener: "text" | "callback"
+   * @return boolean
+   */
+  private isPollingListener(listener: listenerType) {
+    return this.pollingArguments.some((value) => value.listener === listener);
+  }
+
+  /**
+   * on
+   * @param listener: listenerType
+   * @param callback: callbackType
+   */
+  on(listener: listenerType, callback: callbackType) {
+    const isExists = this.isPollingListener(listener);
+    !isExists && this.pollingArguments.push({ listener, callback });
   }
 
   /**
@@ -48,7 +200,9 @@ export default class TelegramApi {
 
   /**
    * 메시지 보내기
+   * @param chatId: number
    * @param message: string
+   * @param parse_mode?: string
    */
   async sendMessage(chatId: number, message: string, parse_mode?: string) {
     await Fetch.post(
@@ -64,8 +218,10 @@ export default class TelegramApi {
 
   /**
    * inline button 메시지 보내기
+   * @param chatId: number
    * @param message: string
    * @param inlineButton: IInlineButton[][]
+   * @param parse_mode?: string
    */
   async sendInlineButtonMessage(
     chatId: number,
@@ -87,8 +243,9 @@ export default class TelegramApi {
 
   /**
    * inline button 메시지 보내기
-   * @param message: string
-   * @param inlineButton: string
+   * @param chatId: number
+   * @param  message: string
+   * @param  keyboard: string[][]
    */
   async sendKeyboardMessage(
     chatId: number,
@@ -112,6 +269,7 @@ export default class TelegramApi {
 
   /**
    * 메시지 삭제하기
+   * @param chatId: number
    * @param messageId: number
    */
   async deleteMessage(chatId: number, messageId: number) {
@@ -128,7 +286,7 @@ export default class TelegramApi {
   /**
    * 채팅방 마지막 메시지번호 가져오기
    */
-  async getLastUpdateMessageId() {
+  private async getLastUpdateMessageId() {
     const res:
       | {
           data: { ok: boolean; result: IResultProps[] };
@@ -151,7 +309,7 @@ export default class TelegramApi {
    * 텔레그램 마지막 메시지ID를 가져온다.
    * @param result: IResultProps[]
    */
-  getLastMessageId(result: IResultProps[]) {
+  private getLastMessageId(result: IResultProps[]) {
     if (result.length > 0) {
       return result[result.length - 1].update_id;
     }
@@ -159,9 +317,9 @@ export default class TelegramApi {
 
   /**
    * 텔레그램 마지막 메시지ID를 등록한다.
-   * @param updateId: number
+   * @param updateId?: number
    */
-  setLastMessageId(updateId?: number) {
+  private setLastMessageId(updateId?: number) {
     if (
       updateId &&
       (!this.lastUpdateMessageId || this.lastUpdateMessageId < updateId)
@@ -170,12 +328,20 @@ export default class TelegramApi {
     }
   }
 
+  /**
+   * sleep
+   * @param ms: number
+   */
   sleep(ms: number) {
     return new Promise((resolve) => {
       setTimeout(resolve, ms);
     });
   }
 
+  /**
+   * sleep
+   * @param msg: any
+   */
   asyncLog(msg: any) {
     return new Promise((resolve) => {
       console.log(moment().format("YYYY-MM-DD HH:mm:ss"), msg);

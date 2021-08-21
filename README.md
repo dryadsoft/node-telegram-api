@@ -21,6 +21,8 @@ $ yarn add node-telegram-api
 
 ### TypeScript
 
+> 기본적인 node-telegram-api 객체 생성후 메시지 발송하는 예저
+
 ```typescript
 import TelegramApi from "node-telegram-api";
 
@@ -69,72 +71,52 @@ telegramApi.sendInlineButtonMessage(
 
 ![키보드메시지](https://github.com/dryadsoft/node-telegram-api/blob/master/images/inlinebutton.JPG)
 
-```typescript
-// 4. telegram bot 예제
-(async () => {
-  try {
-    while (true) {
-      const arrResult = await telegramApi.getUpdates();
-      if (arrResult) {
-        arrResult.forEach(async (item) => {
-          // await telegramApi.asyncLog(item); // async log
-          if (item.message) {
-            const {
-              message: {
-                chat: { id },
-                from: { is_bot },
-                text,
-              },
-              update_id,
-            } = item;
+## 예제(usage)
 
-            if (!is_bot) {
-              let sendMsg = "";
-              switch (text) {
-                case "/start":
-                  sendMsg = "텔레그램 봇에 오신걸 환영합니다.";
-                  await telegramApi.sendMessage(id, sendMsg);
-                  break;
-                default:
-                  sendMsg = "텔레그램 봇입니다.";
-                  await telegramApi.sendMessage(id, sendMsg);
-                  break;
-              }
-            }
-          } else if (item.callback_query) {
-            // 채팅창의 버튼 메시지에서 버튼클릭시 콜백처리
-            const {
-              callback_query: {
-                message: {
-                  message_id,
-                  chat: { id },
-                  text,
-                },
-                data,
-              },
-              update_id,
-            } = item;
-            let sendMsg = "";
-            // text값은 inline버튼의 message 값이다.
-            switch (text) {
-              case "인라인버튼":
-                // data 값은 인라인버튼의 callback_data 값이다.
-                sendMsg = `callback_data: ${data}`;
-                await telegramApi.sendMessage(id, sendMsg);
-                // 인라인버튼이 클릭되고 중복클릭을 방지하고싶다면 인라인버튼을 채팅창에서 삭제한다.
-                await telegramApi.deleteMessage(id, message_id);
-                break;
-            }
-          }
-        });
-      }
-      // sleep 1초
-      await telegramApi.sleep(1000);
-    }
-  } catch (err) {
-    console.log(err);
+### TypeScript
+
+> 지속적으로 텔레그램 채팅창을 조회하여 상호 작용할 수 있도록 polling 방식으로 telegramApi 객체를 생성한다.
+
+```typescript
+// 1. telegram bot 객체 생성
+const telegramApi = new TelegramApi(TELEGRAM_TOKEN, {
+  polling: true, // polling 여부
+  process: "parallel", // parallel: 병렬 메시지 처리, series: 직렬 메시지 처리
+});
+```
+
+```typescript
+// 1. 채팅창에 메시지가 입력되면 실행되는 콜백 Listener를 정의한다.
+telegramApi.on("text", async ({ chatId, messageId, text }) => {
+  let sendMsg = "";
+  switch (text) {
+    case "/start":
+      sendMsg = "텔레그램 봇에 오신걸 환영합니다.";
+      await telegramApi.sendMessage(chatId, sendMsg);
+      break;
+    default:
+      sendMsg = `텔레그램 봇입니다.[${text}]`;
+      await telegramApi.sendMessage(chatId, sendMsg);
+      break;
   }
-})();
+});
+```
+
+```typescript
+// 2. 채팅장에 생성된 버튼 클릭시 실행되는 콜백 Listener를 정의한다.
+telegramApi.on("callback", async ({ chatId, messageId, text, data }) => {
+  let sendMsg = "";
+  // text값은 inline버튼의 message 값이다.
+  switch (text) {
+    case "인라인버튼":
+      // data값은 인라인버튼의 callback_data 값이다.
+      sendMsg = `callback_data: ${data}`;
+      await telegramApi.sendMessage(chatId, sendMsg);
+      // 인라인버튼이 클릭되고 중복클릭을 방지하고싶다면 인라인버튼을 채팅창에서 삭제한다.
+      await telegramApi.deleteMessage(chatId, messageId);
+      break;
+  }
+});
 ```
 
 ## Resources

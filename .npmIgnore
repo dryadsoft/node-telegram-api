@@ -1,5 +1,7 @@
 node_modules
 src
+example
 .env
-example.ts
 images
+.gitIgnore
+.npmIgnore

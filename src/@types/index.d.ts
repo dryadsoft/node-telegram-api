@@ -14,6 +14,7 @@ export interface IEntitiesProps {
   length: number;
   type: string;
 }
+
 export interface IMessage {
   message_id: number;
   from: IFromProps;
@@ -40,4 +41,23 @@ export interface IResultProps {
 export interface IInlineButton {
   text: string;
   callback_data: string;
+}
+
+export interface IPollingCallbackProps {
+  chatId: number;
+  messageId: number;
+  text: string;
+  data?: string;
+}
+
+export type processType = "parallel" | "series";
+export type listenerType = "text" | "callback";
+export type callbackType = (param: IPollingCallbackProps) => Promise<void>;
+export interface ITelegramApiProps {
+  polling?: boolean;
+  process?: processType;
+}
+export interface IPollingArgumentProps {
+  listener: listenerType;
+  callback: callbackType;
 }

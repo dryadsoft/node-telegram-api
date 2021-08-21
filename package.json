@@ -1,13 +1,13 @@
 {
   "name": "node-telegram-api",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "main": "lib/index.js",
   "files": [
     "lib/**/*"
   ],
   "types": "lib/index.d.ts",
   "author": "dryadsoft <dryadsoft@gmail.com>",
-  "description": "node telegram api",
+  "description": "node.js를 이용하여 텔레그램 bot 또는 텔레그램 api를 사용할 수 있습니다.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -15,20 +15,24 @@
   },
   "keywords": [
     "telegram",
+    "텔레그램",
     "api",
-    "bot",
+    "telegram bot",
+    "텔레그램 봇",
     "node.js",
     "node",
     "typescript"
   ],
   "homepage": "https://github.com/dryadsoft/node-telegram-api",
   "bugs": {
-    "url": "https://github.com/dryadsoft/node-telegram-api/issues"
+    "url": "https://github.com/dryadsoft/node-telegram-api/issues",
+    "email": "dryadsoft@gmail.com"
   },
   "scripts": {
     "prepublishOnly": "tsc",
     "build": "tsc",
-    "dev": "ts-node src/example.ts"
+    "dev:polling": "ts-node example/pollingExample.ts",
+    "dev": "ts-node example/example.ts"
   },
   "dependencies": {
     "axios": "^0.21.1",
@@ -36,6 +40,7 @@
   },
   "devDependencies": {
     "@types/node": "^16.6.1",
+    "dotenv": "^10.0.0",
     "ts-node": "^10.2.1",
     "typescript": "^4.3.5"
   },
