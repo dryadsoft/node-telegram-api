@@ -29,8 +29,8 @@
     "email": "dryadsoft@gmail.com"
   },
   "scripts": {
-    "prepublishOnly": "tsc",
-    "build": "tsc",
+    "prepublishOnly": "yarn build",
+    "build": "tsc && cp -r src/@types lib/@types",
     "dev:polling": "ts-node example/pollingExample.ts",
     "dev": "ts-node example/example.ts"
   },
