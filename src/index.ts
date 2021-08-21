@@ -8,7 +8,7 @@ import {
   IResultProps,
   ITelegramApiProps,
   listenerType,
-} from "./@types";
+} from "./@types/telegram";
 import Fetch from "./Fetch";
 
 const BASE_URL = `https://api.telegram.org`;

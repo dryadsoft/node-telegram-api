@@ -1,6 +1,14 @@
 # CHANGELOG
 
-### 0.1.0 (2021-08021)
+### 0.1.1 (2021-08-22)
+
+수정 및 기능추가:
+
+- 수정: type 오류 수정
+
+### 0.1.0 (2021-08-21)
+
+수정 및 기능추가:
 
 - 기능추가: on eventListener 추가(on 속성: text, callback)
 - 기능추가: constructor에 options parameter 추가 (polling, process)

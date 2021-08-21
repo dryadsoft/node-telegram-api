@@ -21,7 +21,7 @@ $ yarn add node-telegram-api
 
 ### TypeScript
 
-> 기본적인 node-telegram-api 객체 생성후 메시지 발송하는 예저
+> 기본적인 node-telegram-api 객체 생성후 메시지 발송하는 예제
 
 ```typescript
 import TelegramApi from "node-telegram-api";
@@ -78,6 +78,7 @@ telegramApi.sendInlineButtonMessage(
 > 지속적으로 텔레그램 채팅창을 조회하여 상호 작용할 수 있도록 polling 방식으로 telegramApi 객체를 생성한다.
 
 ```typescript
+import TelegramApi from "node-telegram-api";
 // 1. telegram bot 객체 생성
 const telegramApi = new TelegramApi(TELEGRAM_TOKEN, {
   polling: true, // polling 여부
@@ -86,7 +87,7 @@ const telegramApi = new TelegramApi(TELEGRAM_TOKEN, {
 ```
 
 ```typescript
-// 1. 채팅창에 메시지가 입력되면 실행되는 콜백 Listener를 정의한다.
+// 2. 채팅창에 메시지가 입력되면 실행되는 콜백 Listener를 정의한다.
 telegramApi.on("text", async ({ chatId, messageId, text }) => {
   let sendMsg = "";
   switch (text) {
@@ -103,7 +104,7 @@ telegramApi.on("text", async ({ chatId, messageId, text }) => {
 ```
 
 ```typescript
-// 2. 채팅장에 생성된 버튼 클릭시 실행되는 콜백 Listener를 정의한다.
+// 3. 채팅장에 생성된 버튼 클릭시 실행되는 콜백 Listener를 정의한다.
 telegramApi.on("callback", async ({ chatId, messageId, text, data }) => {
   let sendMsg = "";
   // text값은 inline버튼의 message 값이다.
