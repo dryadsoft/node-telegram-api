@@ -30,7 +30,7 @@
   },
   "scripts": {
     "prepublishOnly": "yarn build",
-    "build": "tsc && cp -r src/@types lib/@types",
+    "build": "rm -rf lib && tsc && cp -r src/@types lib/@types",
     "dev:polling": "ts-node example/pollingExample.ts",
     "dev": "ts-node example/example.ts"
   },
