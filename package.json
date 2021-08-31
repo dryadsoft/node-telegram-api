@@ -31,6 +31,7 @@
   "scripts": {
     "prepublishOnly": "yarn build",
     "build": "rm -rf lib && tsc && cp -r src/@types lib/@types",
+    "build_debug": "rm -rf lib && tsc -p ./.tsconfig && cp -r src/@types lib/@types",
     "dev:polling": "ts-node example/pollingExample.ts",
     "dev": "ts-node example/example.ts"
   },
