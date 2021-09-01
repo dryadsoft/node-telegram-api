@@ -48,11 +48,17 @@ export interface IPollingCallbackProps {
   messageId: number;
   text: string;
   data?: string;
+  options?: DynamicObject<any>;
+}
+
+export interface DynamicObject<T> {
+  [key: string]: T;
 }
 
 export type processType = "parallel" | "series";
 export type listenerType = "text" | "callback";
 export type callbackType = (param: IPollingCallbackProps) => Promise<void>;
+export type initCallbackType = (param: DynamicObject<any>) => void;
 export interface ITelegramApiProps {
   polling?: boolean;
   process?: processType;

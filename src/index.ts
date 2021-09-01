@@ -1,10 +1,13 @@
 import moment from "moment";
 import {
   callbackType,
+  DynamicObject,
   ICallbackProps,
   IInlineButton,
   IMessage,
+  initCallbackType,
   IPollingArgumentProps,
+  IPollingCallbackProps,
   IResultProps,
   ITelegramApiProps,
   listenerType,
@@ -14,14 +17,14 @@ import Fetch from "./Fetch";
 const BASE_URL = `https://api.telegram.org`;
 
 export default class TelegramApi {
-  private SERIES: string = "series"; // 직렬
-  private PARALLEL: string = "parallel"; // 병렬
-  private getUpdatesUrl: string;
-  private sendMessageUrl: string;
-  private deleteMessageUrl: string;
+  private readonly SERIES: string = "series"; // 직렬
+  private readonly PARALLEL: string = "parallel"; // 병렬
+  private readonly getUpdatesUrl: string;
+  private readonly sendMessageUrl: string;
+  private readonly deleteMessageUrl: string;
   private lastUpdateMessageId?: number;
   private pollingArguments: IPollingArgumentProps[] = [];
-
+  private options: DynamicObject<any> = {};
   /**
    * constructor
    * @param teletramToken: string;
@@ -41,6 +44,14 @@ export default class TelegramApi {
     })();
   }
 
+  init(callback: initCallbackType) {
+    if (typeof callback === "function") {
+      callback(this.options);
+    }
+  }
+  getCurrentStatus() {
+    return this.options;
+  }
   /**
    * startPolling
    * @param options: ITelegramApiProps
@@ -63,39 +74,41 @@ export default class TelegramApi {
   }
 
   /**
-   * pollParallel
+   * pollParallelJob
    * 메시지 병렬처리
    * @param arrResult: IResultProps[]
    */
   private async pollParallelJob(arrResult: IResultProps[]) {
     arrResult.forEach(async (item) => {
-      if (item.message) {
-        // 일반 메시지
-        await this.callTextMessage(item.message);
-      } else if (item.callback_query) {
-        // 채팅창의 버튼클릭시 콜백처리
-        await this.callCallbackMessage(item.callback_query);
-      }
+      await this.pollJob(item);
     });
   }
 
   /**
-   * series
+   * pollSeriesJob
    * 메시지 직렬처리
    * @param arrResult: IResultProps[]
    */
   private async pollSeriesJob(arrResult: IResultProps[]) {
     for (const item of arrResult) {
-      if (item.message) {
-        // 일반 메시지 콜백처리
-        await this.callTextMessage(item.message);
-      } else if (item.callback_query) {
-        // 채팅창의 버튼클릭시 콜백처리
-        await this.callCallbackMessage(item.callback_query);
-      }
+      await this.pollJob(item);
     }
   }
 
+  /**
+   * pollJob
+   * 메시지 처리
+   * @param item: IResultProps
+   */
+  private async pollJob(item: IResultProps) {
+    if (item.message) {
+      // 일반 메시지 콜백처리
+      await this.callTextMessage(item.message);
+    } else if (item.callback_query) {
+      // 채팅창의 버튼클릭시 콜백처리
+      await this.callCallbackMessage(item.callback_query);
+    }
+  }
   /**
    * callTextMessage
    * 채팅창에 일반메시지 입력되었을때 콜백처리
@@ -109,10 +122,11 @@ export default class TelegramApi {
       text,
     } = message;
     if (!is_bot) {
-      const callback = this.getPollingCallback("text");
-      if (typeof callback === "function") {
-        await callback({ chatId: id, messageId: message_id, text });
-      }
+      await this.callCallback("text", {
+        chatId: id,
+        messageId: message_id,
+        text,
+      });
     }
   }
 
@@ -131,16 +145,33 @@ export default class TelegramApi {
       },
       data,
     } = callback_query;
-    const callback = this.getPollingCallback("callback");
+    await this.callCallback("callback", {
+      chatId: id,
+      messageId: message_id,
+      text,
+      data,
+    });
+  }
+
+  /**
+   * on 이벤트리스너에 등록된 콜백함수 호출
+   */
+  private async callCallback(
+    listener: listenerType,
+    { chatId, messageId, text, data }: IPollingCallbackProps
+  ) {
+    const callback = this.getPollingCallback(listener);
     if (typeof callback === "function") {
       await callback({
-        chatId: id,
-        messageId: message_id,
+        chatId,
+        messageId,
         text,
         data,
+        options: this.options,
       });
     }
   }
+
   /**
    * getPollingCallback
    * listener에 등로된 콜백함수를 리턴
