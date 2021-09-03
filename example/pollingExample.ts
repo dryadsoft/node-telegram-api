@@ -2,7 +2,7 @@ import "dotenv/config";
 import TelegramApi from "../src";
 
 const TELEGRAM_TOKEN = <string>process.env.TELEGRAM_TOKEN; // your telegram token
-// const TELEGRAM_CHAT_ID = Number(<string>process.env.TELEGRAM_CHAT_ID); // your telegram chat ID
+const TELEGRAM_CHAT_ID = Number(<string>process.env.TELEGRAM_CHAT_ID); // your telegram chat ID
 
 const telegramApi = new TelegramApi(TELEGRAM_TOKEN, {
   polling: true,
@@ -97,3 +97,15 @@ telegramApi.on(
     }
   }
 );
+
+(() => {
+  setInterval(() => {
+    const options = telegramApi.getOptions();
+    if (options.isAlarmOn) {
+      telegramApi.pushMessageQueue({
+        chatId: TELEGRAM_CHAT_ID,
+        message: "test",
+      });
+    }
+  }, 3000);
+})();

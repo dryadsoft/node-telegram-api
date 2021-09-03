@@ -17,7 +17,7 @@ yarn 사용:
 $ yarn add node-telegram-api
 ```
 
-## 예제(usage)
+## 예제 1 (usage)
 
 ### TypeScript
 
@@ -69,9 +69,9 @@ telegramApi.sendInlineButtonMessage(
 );
 ```
 
-![키보드메시지](https://github.com/dryadsoft/node-telegram-api/blob/master/images/inlinebutton.JPG)
+![인라인키보드메시지](https://github.com/dryadsoft/node-telegram-api/blob/master/images/inlinebutton.JPG)
 
-## 예제(usage)
+## 예제 2 (usage)
 
 ### TypeScript
 
@@ -89,12 +89,12 @@ const telegramApi = new TelegramApi(TELEGRAM_TOKEN, {
 ```typescript
 // 2. init 메서드 추가
 telegramApi.init((options) => {
-  options.isAlarmOn = false; // 사용자 변수 임의로 추가
+  options.isAlarmOn = false; // 사용자 변수 임의로 추가 가능
 });
 ```
 
 ```typescript
-// 키보드버튼
+// 키보드버튼 샘플
 const getStartKeyboard = (isAlarmOn: boolean) => {
   const alarmOnOfButton = isAlarmOn ? "/알람 끄기" : "/알람 켜기";
   return [
@@ -105,7 +105,7 @@ const getStartKeyboard = (isAlarmOn: boolean) => {
 ```
 
 ```typescript
-// 인라인버튼
+// 인라인버튼 샘플
 const getInlineButton = () => {
   return [
     [
@@ -185,6 +185,25 @@ telegramApi.on(
     }
   }
 );
+```
+
+## 예제 3 (usage)
+
+### TypeScript
+
+> 알람 On/Off 사용방법
+
+```typescript
+setInterval(() => {
+  const options = telegramApi.getOptions(); // init메서드에서 추가한 사용자 변수를 가져온다.
+  if (options.isAlarmOn) {
+    // 사용자변수가 true일때만 messageQueue에 chatID와 message를 push한다.
+    telegramApi.pushMessageQueue({
+      chatId: TELEGRAM_CHAT_ID, // 메시지 받을 사람의 chat_id
+      message: "test", // 메시지 내용
+    });
+  }
+}, 3000);
 ```
 
 ## Resources

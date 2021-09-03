@@ -5,6 +5,7 @@ import {
   ICallbackProps,
   IInlineButton,
   IMessage,
+  IMessageQueueProps,
   initCallbackType,
   IPollingArgumentProps,
   IPollingCallbackProps,
@@ -25,6 +26,7 @@ export default class TelegramApi {
   private lastUpdateMessageId?: number;
   private pollingArguments: IPollingArgumentProps[] = [];
   private options: DynamicObject<any> = {};
+  private messageQueue: IMessageQueueProps[] = [];
   /**
    * constructor
    * @param teletramToken: string;
@@ -52,6 +54,23 @@ export default class TelegramApi {
   getCurrentStatus() {
     return this.options;
   }
+  getOptions() {
+    return this.options;
+  }
+  pushMessageQueue({ chatId, message }: IMessageQueueProps) {
+    this.messageQueue.push({ chatId, message });
+  }
+
+  private async callMessageQueue() {
+    while (this.messageQueue.length > 0) {
+      const queue = this.messageQueue.shift();
+      if (queue) {
+        await this.sendMessage(queue.chatId, queue.message);
+        // sleep 1초
+        await this.sleep(1000);
+      }
+    }
+  }
   /**
    * startPolling
    * @param options: ITelegramApiProps
@@ -70,6 +89,7 @@ export default class TelegramApi {
       }
       // sleep 1초
       await this.sleep(1000);
+      await this.callMessageQueue();
     }
   }
 

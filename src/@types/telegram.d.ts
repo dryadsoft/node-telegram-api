@@ -67,3 +67,8 @@ export interface IPollingArgumentProps {
   listener: listenerType;
   callback: callbackType;
 }
+
+export interface IMessageQueueProps {
+  chatId: number;
+  message: string;
+}
