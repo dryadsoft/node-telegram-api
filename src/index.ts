@@ -46,21 +46,36 @@ export default class TelegramApi {
     })();
   }
 
+  /**
+   * init
+   * @param callback: initCallbackType
+   */
   init(callback: initCallbackType) {
     if (typeof callback === "function") {
       callback(this.options);
     }
   }
-  getCurrentStatus() {
-    return this.options;
-  }
+
+  /**
+   * getOptions
+   */
   getOptions() {
     return this.options;
   }
+
+  /**
+   * pushMessageQueue
+   * @param chatId: number 메시지받을 사람의 chat_id
+   * @param message: string 메시지 내용
+   */
   pushMessageQueue({ chatId, message }: IMessageQueueProps) {
     this.messageQueue.push({ chatId, message });
   }
 
+  /**
+   * callMessageQueue
+   * 메시지큐에 들어가있는 메시지를 처음 들어가있는 순서대로 발송한다.
+   */
   private async callMessageQueue() {
     while (this.messageQueue.length > 0) {
       const queue = this.messageQueue.shift();
