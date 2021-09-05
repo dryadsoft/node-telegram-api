@@ -104,7 +104,7 @@ export default class TelegramApi {
       }
       // sleep 1초
       await this.sleep(1000);
-      await this.callMessageQueue();
+      this.callMessageQueue();
     }
   }
 
