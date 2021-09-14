@@ -194,16 +194,17 @@ telegramApi.on(
 > 알람 On/Off 사용방법
 
 ```typescript
-setInterval(() => {
-  const options = telegramApi.getOptions(); // init메서드에서 추가한 사용자 변수를 가져온다.
-  if (options.isAlarmOn) {
-    // 사용자변수가 true일때만 messageQueue에 chatID와 message를 push한다.
+telegramApi.watch(async ({ options }) => {
+  // init메서드에서 추가한 사용자 변수를 가져온다.
+  const isAlarmOn = options && options.isAlarmOn;
+  if (isAlarmOn) {
+    // 사용자변수가 true일때만 messageQueue에 chatID와 message를 push한다
     telegramApi.pushMessageQueue({
-      chatId: TELEGRAM_CHAT_ID, // 메시지 받을 사람의 chat_id
-      message: "test", // 메시지 내용
+      chatId: TELEGRAM_CHAT_ID,
+      message: "test",
     });
   }
-}, 3000);
+}, 2000); // 2초간의 딜레이를 준다.
 ```
 
 ## Resources

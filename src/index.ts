@@ -12,6 +12,7 @@ import {
   IResultProps,
   ITelegramApiProps,
   listenerType,
+  watchCallbackType,
 } from "./@types/telegram";
 import Fetch from "./Fetch";
 
@@ -238,6 +239,14 @@ export default class TelegramApi {
     !isExists && this.pollingArguments.push({ listener, callback });
   }
 
+  async watch(watchCallback: watchCallbackType, delay = 1000) {
+    if (typeof watchCallback === "function") {
+      while (true) {
+        await watchCallback({ options: this.options });
+        await this.sleep(delay);
+      }
+    }
+  }
   /**
    * 채팅방 메시지 받아오기
    */

@@ -98,14 +98,14 @@ telegramApi.on(
   }
 );
 
-(() => {
-  setInterval(() => {
-    const options = telegramApi.getOptions();
-    if (options.isAlarmOn) {
-      telegramApi.pushMessageQueue({
-        chatId: TELEGRAM_CHAT_ID,
-        message: "test",
-      });
-    }
-  }, 3000);
-})();
+telegramApi.watch(async ({ options }) => {
+  // init메서드에서 추가한 사용자 변수를 가져온다.
+  const isAlarmOn = options && options.isAlarmOn;
+  // 사용자변수가 true일때만 messageQueue에 chatID와 message를 push한다
+  if (isAlarmOn) {
+    telegramApi.pushMessageQueue({
+      chatId: TELEGRAM_CHAT_ID,
+      message: "test",
+    });
+  }
+}, 2000); // 2초간의 딜레이를 준다.

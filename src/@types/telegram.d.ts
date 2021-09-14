@@ -50,6 +50,9 @@ export interface IPollingCallbackProps {
   data?: string;
   options?: DynamicObject<any>;
 }
+export interface IWatchCallbackProps {
+  options?: DynamicObject<any>;
+}
 
 export interface DynamicObject<T> {
   [key: string]: T;
@@ -58,6 +61,7 @@ export interface DynamicObject<T> {
 export type processType = "parallel" | "series";
 export type listenerType = "text" | "callback";
 export type callbackType = (param: IPollingCallbackProps) => Promise<void>;
+export type watchCallbackType = (param: IWatchCallbackProps) => Promise<void>;
 export type initCallbackType = (param: DynamicObject<any>) => void;
 export interface ITelegramApiProps {
   polling?: boolean;
